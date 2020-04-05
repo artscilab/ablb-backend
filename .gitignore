@@ -1,0 +1,4 @@
+.env*
+.deployment
+node_modules
+.vscode
