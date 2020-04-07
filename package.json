@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node index.js",
+    "db:refresh": "node ./scripts/refreshdb.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {
@@ -18,12 +19,15 @@
     "express-session": "^1.17.0",
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.4.1",
-    "mongoose": "^5.8.4",
     "morgan": "^1.9.1",
+    "mysql2": "^2.1.0",
     "node-fetch": "^2.6.0",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "prompt-confirm": "^2.0.4",
+    "sequelize": "^5.21.6",
+    "sequelize-cli": "^5.5.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"

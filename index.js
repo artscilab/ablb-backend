@@ -5,9 +5,7 @@ const express = require("express");
 const cors = require("cors");
 const session = require("express-session");
 const errorHandler = require("errorhandler");
-const mongoose = require("mongoose");
 
-const mongoConnectionString = process.env.MONGODB_CONNECTION;
 const isProduction = process.env.NODE_ENV === "production";
 
 const app = express();
@@ -43,13 +41,7 @@ if (!isProduction) {
   app.use(errorHandler())
 }
 
-mongoose.connect(mongoConnectionString, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
-mongoose.set("debug", true)
-
-require('./src/models/User');
+require('./src/database');
 
 require('./src/config/passport');
 app.use(require('./src/routes'));

@@ -1,9 +1,5 @@
-const mongoose = require('mongoose');
 const passport = require('passport');
-const fetch = require('node-fetch');
 const router = require('express').Router();
-
-const User = mongoose.model('User');
 
 const passportOptions = {session: false}
 
@@ -17,7 +13,7 @@ router.post("/", async (req, res, next) => {
       }
     })
   }
-
+  
   if (!user.password) {
     return res.status(422).json({
       errors: {
@@ -25,15 +21,21 @@ router.post("/", async (req, res, next) => {
       }
     })
   }
-  
-  const finalUser = new User(user)
-  finalUser.setPassword(user.password);
 
-  return finalUser.save()
-    .then(() => res.json({ user: finalUser.toAuthJSON() }))
-    .catch((e) => res.status(400).json({
-      "error": "email already registered"
-    }));
+  return res.status(422).json({
+    errors: {
+      email: "is required"
+    }
+  })
+  
+  // const finalUser = new User(user)
+  // finalUser.setPassword(user.password);
+  
+  // return finalUser.save()
+  //   .then(() => res.json({ user: finalUser.toAuthJSON() }))
+  //   .catch((e) => res.status(400).json({
+  //     "error": "email already registered"
+  //   }));
 })
 
 router.post("/login", async (req, res, next) => {
