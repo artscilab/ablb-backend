@@ -4,7 +4,7 @@ const Confirm = require('prompt-confirm');
 const prompt = new Confirm({
     message: 'This will erase all data in database. Proceed?',
     default: false
-  }).ask((answer) => {
+  }).ask(async (answer) => {
   
     if(!answer) {
       console.log("Terminating. No changes made.");
@@ -19,26 +19,30 @@ const prompt = new Confirm({
       dialect: 'mysql'
     });
 
-    sequelize
-      .authenticate()
-      .then(() => {
-        console.log('Connection has been established successfully.');
-      })
-      .catch(err => {
-        console.error('Unable to connect to the database:', err);
-    });
+    try {
+      await sequelize.authenticate()
+      console.log('Connection has been established successfully.');
+    } catch (err) {
+      console.error('Unable to connect to the database:', err);
+    }
 
-    const Models = require("../models");
+    const User = require("../models/user")
+    const Lesson = require("../models/lesson")
+    const Video = require("../models/Video")
+    const Testimonial = require("../models/testimonial")
 
-    for (item in Models) {
-      Models[item].init(sequelize)
+    User.init(sequelize);
+    Testimonial.init(sequelize);
+    Lesson.init(sequelize);
+    Video.init(sequelize);
+
+    try {
+      await sequelize.sync({ force: true })
+      console.log("Force synced the database schema.");
+    } catch(err) {
+      console.log("Error syncing tables.");
     }
     
-    sequelize.sync({force: true}).then(() => {
-      console.log("Force synced the database schema.");
-      
-      sequelize.close().then(() => {
-        console.log("Closed db connection. Finished successfully.")
-      });
-    });
+    await sequelize.close();
+    console.log("Closed db connection. Finished successfully.")
 })

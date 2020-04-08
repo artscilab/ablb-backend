@@ -1,37 +1,44 @@
 const passport = require('passport');
+const bodyParser = require("body-parser")
 const router = require('express').Router();
 const Joi = require("@hapi/joi");
 const passportOptions = {session: false}
 
 const User = require("../../models/user");
 
+router.use(bodyParser.json())
+
 router.post("/", async (req, res, next) => {
   const { body: { user } } = req;
-
+  
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
     confirmPassword: Joi.ref('password'),
     school: Joi.string().min(2).required(),
-    role: Joi.string().min(2),
+    role: Joi.string().min(2).default("user"),
     name: Joi.string().min(2).required()
   }).with('password', 'confirmPassword');
   
-  const { error, value } = schema.validate();
-
+  const { error, value } = schema.validate(user);
+  
   if (error !== undefined) {
     res.status(400).json(error);
     return;
   }
 
-  const finalUser = new User(user)
-  finalUser.setPassword(user.password);
-  
-  return finalUser.save()
-    .then(() => res.json({ user: finalUser.toAuthJSON() }))
-    .catch((e) => res.status(400).json({
-      "error": "email already registered"
-    }));
+  const { password, email, school, role, name } = value;
+  const { salt, hash } = User.generateHashes(password);
+  try {
+    const newUser = await User.create({
+      email, school, role, name, salt, hash  
+    })
+    res.json({ user: newUser.toAuthJSON() })
+  } catch(e) {
+    res.status(400).json({
+      "error": "email already exists"
+    });
+  }
 })
 
 router.post("/login", async (req, res, next) => {

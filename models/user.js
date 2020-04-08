@@ -2,7 +2,7 @@ const Sequelize = require("sequelize")
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 
-const { Model, STRING } = Sequelize;
+const { Model, STRING, TEXT } = Sequelize;
 
 class User extends Model {
   static init(sequelize_instance) {
@@ -11,7 +11,7 @@ class User extends Model {
         type: STRING,
         unique: true
       },
-      hash: STRING,
+      hash: TEXT,
       salt: STRING,
       school: STRING,
       role: STRING,
@@ -24,7 +24,15 @@ class User extends Model {
 
   setPassword() {
     this.salt = crypto.randomBytes(16).toString('hex');
-    this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString("hex");
+  }
+  
+  static generateHashes(password) {
+    const salt = crypto.randomBytes(16).toString('hex')
+    const hash = crypto.pbkdf2Sync(password, salt, 10000, 512, 'sha512').toString("hex")
+    
+    return {
+      salt, hash
+    }
   }
 
   validatePassword() {
@@ -39,16 +47,17 @@ class User extends Model {
   
     return jwt.sign({
       email: this.email,
-      id: this._id,
+      id: this.id,
       exp: parseInt(expriration.getTime() / 1000, 10)
     }, process.env.JWT_KEY)
   }
 
   toAuthJSON() {
     return {
-      _id: this._id,
+      id: this.id,
       email: this.email,
-      token: token
+      school: this.school,
+      role: this.role
     };
   }
 }

@@ -20,7 +20,6 @@ const Testimonial = require("./testimonial");
 const Lesson = require("./lesson");
 const Video = require("./video");
 
-
 User.init(sequelize).sync();
 Testimonial.init(sequelize).sync();
 Lesson.init(sequelize).sync();
