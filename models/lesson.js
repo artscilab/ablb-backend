@@ -3,16 +3,16 @@ const User = require("./user");
 
 const { Model, STRING, INTEGER, TEXT } = Sequelize;
 
-class Testimonial extends Model {
+class Lesson extends Model {
   static init(sequelize_instance) {
     return super.init({
-      text: {
-        type: TEXT
+      title: {
+        type: STRING
       },
-      name: {
-        type: STRING,
+      description: {
+        type: TEXT,
       },
-      school: {
+      instructionSheetLink: {
         type: STRING
       },
       createdBy: {
@@ -24,9 +24,9 @@ class Testimonial extends Model {
       }
     }, {
       sequelize: sequelize_instance,
-      modelName: "testimonial"
+      modelName: "lesson"
     })
   }
 }
 
-module.exports = Testimonial
+module.exports = Lesson

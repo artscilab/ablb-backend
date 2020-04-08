@@ -41,10 +41,10 @@ if (!isProduction) {
   app.use(errorHandler())
 }
 
-require('./src/database');
+require('./models');
 
-require('./src/config/passport');
-app.use(require('./src/routes'));
+require('./config/passport');
+app.use(require('./routes'));
 
 const port = process.env.PORT || 8000;
 

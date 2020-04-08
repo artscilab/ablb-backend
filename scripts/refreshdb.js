@@ -28,12 +28,12 @@ const prompt = new Confirm({
         console.error('Unable to connect to the database:', err);
     });
 
-    const User = require("../models/user")
-    const Testimonial = require("../models/testimonial");
+    const Models = require("../models");
 
-    User.init(sequelize);
-    Testimonial.init(sequelize);
-
+    for (item in Models) {
+      Models[item].init(sequelize)
+    }
+    
     sequelize.sync({force: true}).then(() => {
       console.log("Force synced the database schema.");
       

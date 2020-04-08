@@ -17,11 +17,18 @@ sequelize
 
 const User = require("./user")
 const Testimonial = require("./testimonial");
+const Lesson = require("./lesson");
+const Video = require("./video");
+
 
 User.init(sequelize).sync();
 Testimonial.init(sequelize).sync();
+Lesson.init(sequelize).sync();
+Video.init(sequelize).sync();
 
 module.exports = {
-  User: User.User,
-  Testimonial: Testimonial.Testimonial
+  User: User,
+  Testimonial: Testimonial,
+  Video: Video,
+  Lesson: Lesson
 }

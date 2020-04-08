@@ -4,47 +4,35 @@ const jwt = require("jsonwebtoken");
 
 const { Model, STRING } = Sequelize;
 
-class User extends Model {}
+class User extends Model {
+  static init(sequelize_instance) {
+    return super.init({
+      email: {
+        type: STRING,
+        unique: true
+      },
+      hash: STRING,
+      salt: STRING,
+      school: STRING,
+      role: STRING,
+      name: STRING,
+    }, {
+      sequelize: sequelize_instance,
+      modelName: "user"
+    })  
+  }
 
-const schema = {
-  email: {
-    type: STRING,
-    unique: true
-  },
-  hash: {
-    type: STRING,
-  },
-  salt: {
-    type: STRING,
-  },
-  school: {
-    type: STRING,
-  },
-  role: {
-    type: STRING,
-  },
-  name: {
-    type: STRING,
-  },
-}
-
-const init = (sequelize) => {
-  User.init(schema, {
-    sequelize,
-    modelName: "user"
-  })
-  
-  User.prototype.setPassword = function(password) {
+  setPassword() {
     this.salt = crypto.randomBytes(16).toString('hex');
     this.hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString("hex");
   }
-  
-  User.prototype.validatePassword = function(password) {
+
+  validatePassword() {
     const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString("hex");
     return this.hash == hash;
   }
-  
-  User.prototype.generateJWT = function() {
+
+  generateJWT() {
     const now = new Date();
     const expriration = new Date(now);
     expriration.setDate(now.getDate() + 5);
@@ -55,19 +43,14 @@ const init = (sequelize) => {
       exp: parseInt(expriration.getTime() / 1000, 10)
     }, process.env.JWT_KEY)
   }
-  
-  User.prototype.toAuthJSON = function(token) {
+
+  toAuthJSON() {
     return {
       _id: this._id,
       email: this.email,
       token: token
     };
-  };
-
-  return User
-} 
-
-module.exports = {
-  init, 
-  User
+  }
 }
+
+module.exports = User
