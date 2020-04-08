@@ -44,26 +44,18 @@ router.post("/", async (req, res, next) => {
 router.post("/login", async (req, res, next) => {
   const { body: { user } } = req;
   
-  if (!user) {
-    return res.status(422).json({
-      "message": "invalid"
-    })
-  }
+  const schema = Joi.object({
+    email: Joi.string().email().required(),
+    password: Joi.string().required()
+  })
 
-  if (!user.email) {
-    return res.status(422).json({
-      errors: {
-        email: "is required"
-      }
-    })
-  }
+  const { error, value } = schema.validate(user);
 
-  if (!user.password) {
-    return res.status(422).json({
-      errors: {
-        password: "is required"
-      }
+  if (error !== undefined) {
+    res.status(400).json({
+      "error": error
     })
+    return
   }
 
   return passport.authenticate('local', passportOptions, (err, pUser, info) => {
@@ -71,7 +63,7 @@ router.post("/login", async (req, res, next) => {
 
     if (pUser) {
       const user = pUser;
-      user.token = pUser.generateJWT();
+      user.token = User.generateJWT(user.email, user.id);
       
       req.login(user.token, passportOptions, (err) => {
         if (err) {
@@ -83,7 +75,7 @@ router.post("/login", async (req, res, next) => {
 
       return
     }
-
+    
     return res.status(400).json({
       error: {
         "email or password": "incorrect"
@@ -92,17 +84,15 @@ router.post("/login", async (req, res, next) => {
   })(req, res, next);
 })
 
-router.get('/current', passport.authenticate('jwt', passportOptions), (req, res, next) => {
-  const {id} = req.user;
+router.get('/current', passport.authenticate('jwt', passportOptions), async (req, res, next) => {
+  const {email} = req.user;
 
-  return User.findById(id)
-    .then((user) => {
-      if(!user) {
-        return res.sendStatus(400);
-      }
-
-      return res.json({ user: user.toAuthJSON() });
-    });
+  const user = await User.findOne({
+    where: {
+      email: email
+    }
+  })
+  return res.json({ user: user.toAuthJSON() });
 });
 
 module.exports = router;

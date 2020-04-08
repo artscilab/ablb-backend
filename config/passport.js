@@ -3,14 +3,18 @@ const LocalStrategy = require("passport-local");
 const passportJWT = require('passport-jwt');
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
-const {User} = require("../models");
+const User = require("../models/user");
 
 passport.use(new LocalStrategy({
   usernameField: "user[email]",
   passwordField: "user[password]"
 }, async (email, password, done) => {
   try {
-    const user = await User.findOne({ where: {email: email} });
+    const user = await User.findOne({
+      where: {
+        email: email
+      }
+    }) 
     if (!user || !user.validatePassword(password)) {
       return done(null, false, {
         errors: {

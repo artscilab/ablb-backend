@@ -35,19 +35,19 @@ class User extends Model {
     }
   }
 
-  validatePassword() {
+  validatePassword(password) {
     const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString("hex");
     return this.hash == hash;
   }
 
-  generateJWT() {
+  static generateJWT(email, id) {
     const now = new Date();
     const expriration = new Date(now);
     expriration.setDate(now.getDate() + 5);
   
     return jwt.sign({
-      email: this.email,
-      id: this.id,
+      email: email,
+      id: id,
       exp: parseInt(expriration.getTime() / 1000, 10)
     }, process.env.JWT_KEY)
   }
@@ -57,7 +57,8 @@ class User extends Model {
       id: this.id,
       email: this.email,
       school: this.school,
-      role: this.role
+      role: this.role,
+      token: this.token
     };
   }
 }
