@@ -5,8 +5,7 @@ const Joi = require("@hapi/joi");
 const pOptions = {session: false}
 const { adminRoute } = require("../../utils/middleware");
 
-const User = require("../../models/user");
-const Testimonial = require("../../models/testimonial");
+const { Testimonial } = require("../../models");
 
 router.use(bodyParser.json())
 

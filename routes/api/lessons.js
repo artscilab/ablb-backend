@@ -5,7 +5,7 @@ const Joi = require("@hapi/joi");
 const { adminRoute } = require("../../utils/middleware");
 const pOptions = {session: false}
 
-const Lesson = require("../../models/lesson")
+const { Lesson } = require("../../models")
 
 router.use(bodyParser.json());
 
@@ -27,7 +27,9 @@ router.get("/:id", async (req, res) => {
   
   try {
     const lesson = await Lesson.findByPk(id)
-    
+    if (lesson === null) {
+      throw "failed to find that lesson"
+    }
     res.json(lesson)
   } catch (e) {
     res.status(404).json({
@@ -99,7 +101,6 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (
     const i = await Lesson.update(value, {
       where: { id: id }
     })
-    console.log("i:", i);
     
     res.status(200).json({
       message: "lesson updated"
@@ -110,7 +111,6 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (
     })
   }
 });
-
 
 // delete one 
 router.delete("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (req, res) => {

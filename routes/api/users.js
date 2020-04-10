@@ -4,7 +4,7 @@ const router = require('express').Router();
 const Joi = require("@hapi/joi");
 const passportOptions = {session: false}
 const { authUserFromJWT } = require("../../utils")
-const User = require("../../models/user");
+const { User } = require("../../models");
 
 router.use(bodyParser.json())
 
