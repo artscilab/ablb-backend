@@ -12,14 +12,41 @@ router.use(bodyParser.json())
 
 // list all
 router.get("/", async (req, res, next) => {
-  const testimonials = await Testimonial.findAll();
-  
-  res.json(testimonials)
+  try {
+    const testimonials = await Testimonial.findAll();
+    res.json(testimonials)
+  } catch (e) {
+    res.status(500).json({
+      errors: "failed to get testimonials"
+    })
+  }
+})
+
+// get one
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const testimonial = await Testimonial.findByPk(id);
+
+    res.json(testimonial)
+  } catch (e) {
+    res.status(500).json({
+      errors: "failed to get that testimoial"
+    })
+  }
 })
 
 // create one 
 router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req, res, next) => {
   const { user, body: { testimonial } } = req;
+
+  if (testimonial === undefined) {
+    res.status(400).json({
+      error: "please provide testimonial data to create a new testimonial"
+    })
+    return
+  }
 
   const testimonialSchema = Joi.object({
     text: Joi.string().required(),
@@ -35,17 +62,30 @@ router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req,
   }
   
   const { text, name, school } = value;
-  const testimonialToSave = await Testimonial.create({
-    text, name, school, createdBy: user.id
-  });
 
-  res.json(testimonialToSave)
+  try {
+    const testimonialToSave = await Testimonial.create({
+      text, name, school, createdBy: user.id
+    });
+    res.json(testimonialToSave)
+  } catch (e) {
+    res.status(500).json({
+      error: "failed to create testimonial"
+    })
+  }
 })
 
 // edit one 
 router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async(req, res) => {
   const { params: { id: tId }, body: { testimonial } } = req;
   
+  if (testimonial === undefined) {
+    res.status(400).json({
+      error: "please provide testimonial data to edit testimonial"
+    })
+    return
+  }
+
   const testimonialSchema = Joi.object({
     text: Joi.string(),
     name: Joi.string(),
@@ -78,7 +118,7 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async(r
 
 // delete one 
 router.delete("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (req, res) => {
-  const { user, params: { id: tId } } = req;
+  const { params: { id: tId } } = req;
 
   try {
     await Testimonial.destroy({

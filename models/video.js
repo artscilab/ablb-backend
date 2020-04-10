@@ -41,7 +41,20 @@ class Video extends Model {
       sequelize: sequelize_instance,
       modelName: "video"
     })
+  }
 
+  static findAll(params) {
+    const result = super.findAll(params);
+    const mapped = result.map(res => {
+      const {
+        id, description, title, partNumber, lessonId
+      } = res.dataValues;
+      return {
+        id, description, title, partNumber, lessonId
+      }
+    });
+
+    return mapped;
   }
 }
 
