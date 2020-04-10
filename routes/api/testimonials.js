@@ -10,12 +10,14 @@ const Testimonial = require("../../models/testimonial");
 
 router.use(bodyParser.json())
 
+// list all
 router.get("/", async (req, res, next) => {
   const testimonials = await Testimonial.findAll();
   
   res.json(testimonials)
 })
 
+// create one 
 router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req, res, next) => {
   const { user, body: { testimonial } } = req;
 
@@ -40,26 +42,7 @@ router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req,
   res.json(testimonialToSave)
 })
 
-router.delete("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (req, res) => {
-  const { user, params: { id: tId } } = req;
-
-  try {
-    await Testimonial.destroy({
-      where: {
-        id: tId
-      }
-    });
-
-    res.json({
-      "message": `Testimonial with id ${tId} deleted`
-    })
-  } catch (err) {
-    res.status(500).json({
-      "error": `failed to delete testimonial with id ${tId}`
-    })
-  }
-})
-
+// edit one 
 router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async(req, res) => {
   const { params: { id: tId }, body: { testimonial } } = req;
   
@@ -89,6 +72,27 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async(r
     console.log(e);
     res.status(404).json({
       error: "failed to find or update that record"
+    })
+  }
+})
+
+// delete one 
+router.delete("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (req, res) => {
+  const { user, params: { id: tId } } = req;
+
+  try {
+    await Testimonial.destroy({
+      where: {
+        id: tId
+      }
+    });
+
+    res.json({
+      "message": `Testimonial with id ${tId} deleted`
+    })
+  } catch (err) {
+    res.status(500).json({
+      "error": `failed to delete testimonial with id ${tId}`
     })
   }
 })
