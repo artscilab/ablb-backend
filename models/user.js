@@ -58,7 +58,7 @@ class User extends Model {
       email: this.email,
       school: this.school,
       role: this.role,
-      token: this.token
+      token: User.generateJWT(this.email, this.id)
     };
   }
 }

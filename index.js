@@ -3,7 +3,6 @@ const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const express = require("express");
 const cors = require("cors");
-const session = require("express-session");
 const errorHandler = require("errorhandler");
 
 const isProduction = process.env.NODE_ENV === "production";
@@ -27,15 +26,6 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan("dev"));
-app.use(session({
-  secret: "hmmidkwhattoputhere",
-  resave: true,
-  saveUninitialized: true,
-  name: 'ablb-session',
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7 // 1 week
-  }
-}))
 
 if (!isProduction) {
   app.use(errorHandler())
@@ -47,6 +37,5 @@ require('./config/passport');
 app.use(require('./routes'));
 
 const port = process.env.PORT || 8000;
-
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))

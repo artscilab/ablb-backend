@@ -27,6 +27,20 @@ class Testimonial extends Model {
       modelName: "testimonial"
     })
   }
+
+  static findAll(params) {
+    const result = super.findAll(params);
+    const mapped = result.map(res => {
+      const {
+        id, name, text, school
+      } = res.dataValues;
+      return {
+        id, name, text, school
+      }
+    });
+
+    return mapped;
+  }
 }
 
 module.exports = Testimonial

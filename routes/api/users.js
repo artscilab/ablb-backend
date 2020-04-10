@@ -3,7 +3,7 @@ const bodyParser = require("body-parser")
 const router = require('express').Router();
 const Joi = require("@hapi/joi");
 const passportOptions = {session: false}
-
+const { authUserFromJWT } = require("../../utils")
 const User = require("../../models/user");
 
 router.use(bodyParser.json())
@@ -11,6 +11,13 @@ router.use(bodyParser.json())
 router.post("/", async (req, res, next) => {
   const { body: { user } } = req;
   
+  if (user === undefined) {
+    res.status(400).json({
+      "error": "please provide user details"
+    });
+    return;
+  }
+
   const schema = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(8).required(),
@@ -20,10 +27,32 @@ router.post("/", async (req, res, next) => {
     name: Joi.string().min(2).required()
   }).with('password', 'confirmPassword');
   
-  const { error, value } = schema.validate(user);
-  
+  let { error, value } = schema.validate(user);
   if (error !== undefined) {
     res.status(400).json(error);
+    return;
+  }
+
+  if (value.role === "admin") {
+    try {
+      const requestUser = await authUserFromJWT(req, res);
+      const user = await User.findOne({
+        where: {
+          id: requestUser.id
+        }
+      });
+      if (!user || user.role !== "admin") {
+        res.status(401).json({
+          "error": "You must be an admin to create an admin user."
+        });
+      }
+    } catch(e) {
+      console.error(e);
+      
+      res.status(401).json({
+        "error": "You must be logged in to create an admin user."
+      });
+    } 
     return;
   }
 
@@ -57,7 +86,7 @@ router.post("/login", async (req, res, next) => {
     })
     return
   }
-
+  
   return passport.authenticate('local', passportOptions, (err, pUser, info) => {
     if (err) return next(err);
 
@@ -84,7 +113,7 @@ router.post("/login", async (req, res, next) => {
   })(req, res, next);
 })
 
-router.get('/current', passport.authenticate('jwt', passportOptions), async (req, res, next) => {
+router.get('/refresh', passport.authenticate('jwt', passportOptions), async (req, res, next) => {
   const {email} = req.user;
 
   const user = await User.findOne({
