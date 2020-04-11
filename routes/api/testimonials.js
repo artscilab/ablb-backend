@@ -27,7 +27,9 @@ router.get("/:id", async (req, res, next) => {
 
   try {
     const testimonial = await Testimonial.findByPk(id);
-
+    if (testimonial === null) {
+      throw "couldn't find that testimonial"
+    }
     res.json(testimonial)
   } catch (e) {
     res.status(500).json({
