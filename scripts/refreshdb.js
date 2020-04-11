@@ -40,12 +40,21 @@ const run = async () => {
   const accountAnswers = await inquirer.prompt(questions);
   if (accountAnswers.password !== accountAnswers.confirmPassword) {
     console.log("Make sure password and confirm password match! Terminating.")
-    process.exit(0)
+    return
   }
 
   const Sequelize = require("sequelize");
 
   const {DB_NAME, DB_USERNAME, DB_PASSWORD, DB_HOST} = process.env;
+  if (
+    DB_NAME === undefined || 
+    DB_USERNAME === undefined || 
+    DB_PASSWORD === undefined || 
+    DB_HOST === undefined 
+    ) {
+      console.log("Please add enviroment config for database connection.")
+    }
+
   const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
     host: DB_HOST,
     dialect: 'mysql'
@@ -56,6 +65,7 @@ const run = async () => {
     console.log('Connection has been established successfully.');
   } catch (err) {
     console.error('Unable to connect to the database:', err);
+    return
   }
 
   const User = require("../models/user")
@@ -76,7 +86,7 @@ const run = async () => {
   }
   
   const { name, email, password } = accountAnswers;
-  
+
   const { salt, hash } = User.generateHashes(password);
   const firstUser = await User.create({
     name, email, salt, hash, role: "admin", school: "UT Dallas"

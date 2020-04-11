@@ -22,6 +22,9 @@ class Video extends Model {
       partNumber: {
         type: INTEGER,
       },
+      videoLink: {
+        type: TEXT,
+      },
       createdBy: {
         type: INTEGER,
         references: {

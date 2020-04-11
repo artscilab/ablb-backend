@@ -9,6 +9,7 @@ const { Video } = require("../../models")
 
 router.use(bodyParser.json());
 
+// get all 
 router.get("/", async (req, res) => {
   try {
     const videos = await Video.findAll();
@@ -20,6 +21,7 @@ router.get("/", async (req, res) => {
   }
 })
 
+// get one
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -36,6 +38,7 @@ router.get("/:id", async (req, res) => {
   } 
 })
 
+// create one 
 router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req, res) => {
   const { user, body: { video }} = req;
 
@@ -72,6 +75,67 @@ router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req,
   } catch (e) {
     res.status(500).json({
       error: "failed to create video"
+    })
+  }
+})
+
+router.patch("/:id", passport.authenticate('jwt', pOptions), adminRoute, async (req, res) => {
+  const { params: { id }, body: { video } } = req;
+
+  if (video === undefined) {
+    res.status(400).json({
+      error: "please provide video data to edit it"
+    })
+    return
+  }
+
+  const videoSchema = Joi.object({
+    title: Joi.string(),
+    description: Joi.string(),
+    partNumber: Joi.number(),
+    videoLink: Joi.string(),
+    lessonId: Joi.number(),
+  })
+
+  const { error, value } = videoSchema.validate(video);
+  if (error !== undefined) {
+    res.status(400).json(error);
+    return
+  }
+
+  try {
+    await Video.update(value, {
+      where: {
+        id: id
+      }
+    })
+    res.status(200).json({
+      message: "updated testimonial."
+    })
+  } catch (e) {
+    console.log(e);
+    res.status(404).json({
+      error: "failed to find or update that record"
+    })
+  }
+})
+
+router.delete("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (req, res) => {
+  const { params: { id: tId } } = req;
+
+  try {
+    await Video.destroy({
+      where: {
+        id: tId
+      }
+    });
+
+    res.json({
+      "message": `Video with id ${tId} deleted`
+    })
+  } catch (err) {
+    res.status(500).json({
+      "error": `failed to delete video with id ${tId}`
     })
   }
 })
