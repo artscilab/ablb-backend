@@ -25,6 +25,8 @@ Testimonial.init(sequelize).sync();
 Lesson.init(sequelize).sync();
 Video.init(sequelize).sync();
 
+Lesson.hasMany(Video)
+
 module.exports = {
   User: User,
   Testimonial: Testimonial,

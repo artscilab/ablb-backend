@@ -139,3 +139,5 @@ router.delete("/:id", passport.authenticate("jwt", pOptions), adminRoute, async 
     })
   }
 })
+
+module.exports = router

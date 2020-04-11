@@ -5,7 +5,7 @@ const Joi = require("@hapi/joi");
 const { adminRoute } = require("../../utils/middleware");
 const pOptions = {session: false}
 
-const { Lesson } = require("../../models")
+const { Lesson, Video } = require("../../models")
 
 router.use(bodyParser.json());
 
@@ -26,14 +26,53 @@ router.get("/:id", async (req, res) => {
   const { id } = req.params;
   
   try {
-    const lesson = await Lesson.findByPk(id)
+    let options = {}
+
+    if (req.query.include !== undefined) {
+      options = {
+        include: [{
+          model: Video,
+          as: "videos"
+        }]
+      }
+    }
+    
+    const lesson = await Lesson.findByPk(id, options)
     if (lesson === null) {
       throw "failed to find that lesson"
     }
     res.json(lesson)
   } catch (e) {
+    console.log(e);
+    
     res.status(404).json({
       errors: "failed to get that lesson"
+    })
+  }
+})
+
+router.get("/:id/videos", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const videos = await Video.findAll({
+      where: {
+        lessonId: id
+      }
+    })
+
+    if (videos.length <= 0) {
+      res.status(404).json({
+        errors: "no videos for that lesson"
+      })
+      return
+    }
+
+    res.json(videos);
+  } catch (e) {
+    console.log(e);
+    res.status(500).json({
+      error: "failed to get videos for that lesson"
     })
   }
 })
