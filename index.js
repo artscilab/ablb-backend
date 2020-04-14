@@ -1,12 +1,20 @@
-require("dotenv").config();
+require("dotenv-safe").config({
+  allowEmptyValues: true,
+});
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const express = require("express");
 const cors = require("cors");
 const querystring = require("querystring");
 const errorHandler = require("errorhandler");
+const fs = require('fs')
 
 const isProduction = process.env.NODE_ENV === "production";
+
+if (!fs.existsSync(process.env.VIDEO_FILEPATH)) {
+  console.log("video file path does not exist.");  
+  process.exit(0)
+}
 
 const app = express();
 

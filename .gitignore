@@ -1,4 +1,6 @@
-.env*
+.env
 .deployment
 node_modules
 .vscode
+files/
+tmp/

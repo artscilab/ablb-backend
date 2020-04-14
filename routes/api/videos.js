@@ -2,9 +2,12 @@ const passport = require('passport');
 const bodyParser = require("body-parser")
 const router = require('express').Router();
 const Joi = require("@hapi/joi");
+const fileUpload = require('express-fileupload');
 const { adminRoute } = require("../../utils/middleware");
+const { fileStoragePath } = require("../../utils")
 const pOptions = {session: false}
-
+const fs = require("fs")
+const path = require("path")
 const { Video } = require("../../models")
 
 router.use(bodyParser.json());
@@ -26,16 +29,64 @@ router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const video = Video.findByPk(id);
+    const video = await Video.findByPk(id);
 
     if (video === null) {
       throw "Could't find that video"
     }
+    res.status(200).json({
+      video: video
+    })
   } catch (e) {
     res.status(500).json({
       errors: "failed to get that video"
     })
   } 
+})
+
+router.get("/:id/stream", passport.authenticate("jwt", pOptions), async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const data = await Video.findByPk(id);
+    const filePath = data.videoLink;
+    if (filePath === null || filePath === undefined) {
+      return res.status(404).json({
+        error: "There is no video file."
+      })
+    }
+
+    const stat = fs.statSync(filePath);
+    const fileSize = stat.size;
+    const range = req.headers.range;
+
+    if (range) {
+      const parts = range.replace(/bytes=/, "").split("-")
+      const start = parseInt(parts[0], 10)
+      const end = parts[1] 
+        ? parseInt(parts[1], 10)
+        : fileSize-1
+      const chunksize = (end-start)+1
+      const file = fs.createReadStream(filePath, {start, end})
+      const head = {
+        'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunksize,
+        'Content-Type': 'video/mp4',
+      }
+      res.writeHead(206, head);
+      file.pipe(res);
+    } else {
+      const head = {
+        'Content-Length': fileSize,
+        'Content-Type': 'video/mp4',
+      }
+      res.writeHead(200, head)
+      fs.createReadStream(filePath).pipe(res)
+    }
+  } catch (e) {
+    return res.status(500)
+  }
 })
 
 // create one 
@@ -77,6 +128,49 @@ router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req,
       error: "failed to create video"
     })
   }
+})
+
+const uploadMiddleWare = fileUpload({
+  useTempFiles: true,
+  tempFileDir: '/tmp/',
+  debug: process.env.NODE_ENV === "dev" ? true : false,
+  safeFileNames: true,
+  preserveExtension: true
+})
+
+router.patch("/:id/upload", passport.authenticate("jwt", pOptions), adminRoute, uploadMiddleWare, async (req, res) => {
+  const id = req.params.id;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+
+  const videoFile = req.files.videoFile;
+  if (videoFile.mimetype !== "image/jpeg") {
+    return res.status(400).json({
+      error: "only mp4s are supported"
+    })
+  }
+  const videoFileName = `${process.env.VIDEO_FILEPATH}/${videoFile.name}`
+  videoFile.mv(videoFileName, async (err) => {
+    if (err) {
+      return res.status(500).json({
+        error: "error uploading file"
+      })
+    }
+    
+    try {
+      await Video.update({videoLink: videoFileName}, {where: {id: id}})
+  
+      return res.status(200).json({
+        message: "file uploaded"
+      })
+    } catch (e) {
+      return res.status(500).json({
+        error: "error updating video"
+      })  
+    }
+  });
 })
 
 router.patch("/:id", passport.authenticate('jwt', pOptions), adminRoute, async (req, res) => {
