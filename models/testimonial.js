@@ -1,7 +1,7 @@
 const Sequelize = require("sequelize")
 const User = require("./user");
 
-const { Model, STRING, INTEGER, TEXT } = Sequelize;
+const { Model, STRING, INTEGER, TEXT, BOOLEAN } = Sequelize;
 
 class Testimonial extends Model {
   static init(sequelize_instance) {
@@ -14,6 +14,10 @@ class Testimonial extends Model {
       },
       school: {
         type: STRING
+      },
+      featured: {
+        type: BOOLEAN,
+        defaultValue: false,
       },
       createdBy: {
         type: INTEGER,

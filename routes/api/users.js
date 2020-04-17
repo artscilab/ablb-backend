@@ -5,7 +5,7 @@ const Joi = require("@hapi/joi");
 const passportOptions = {session: false}
 const { authUserFromJWT } = require("../../utils")
 const { User } = require("../../models");
-
+const { adminRoute } = require("../../utils/middleware");
 router.use(bodyParser.json())
 
 router.post("/", async (req, res, next) => {
@@ -123,5 +123,15 @@ router.get('/refresh', passport.authenticate('jwt', passportOptions), async (req
   })
   return res.json({ user: user.toAuthJSON() });
 });
+
+router.get("/authorize", passport.authenticate("jwt", passportOptions), adminRoute, async (req, res) => {
+  const { email, id } = req.user;
+
+  const user = await User.findByPk(id);
+
+  return res.json({
+    user: user.toSafeJSON()
+  })
+})
 
 module.exports = router;

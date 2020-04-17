@@ -52,6 +52,15 @@ class User extends Model {
     }, process.env.JWT_KEY)
   }
 
+  toSafeJSON() {
+    return {
+      id: this.id,
+      email: this.email,
+      school: this.school,
+      role: this.role
+    };
+  }
+
   toAuthJSON() {
     return {
       id: this.id,

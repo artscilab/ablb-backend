@@ -41,7 +41,8 @@ router.get("/:id", async (req, res, next) => {
 // create one 
 router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req, res, next) => {
   const { user, body: { testimonial } } = req;
-
+  console.log(testimonial);
+  
   if (testimonial === undefined) {
     res.status(400).json({
       error: "please provide testimonial data to create a new testimonial"
@@ -52,7 +53,8 @@ router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req,
   const testimonialSchema = Joi.object({
     text: Joi.string().required(),
     name: Joi.string().required(),
-    school: Joi.string()
+    school: Joi.string(),
+    featured: Joi.boolean().default("false")
   })
   
   const { error, value } = testimonialSchema.validate(testimonial)
@@ -62,11 +64,11 @@ router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req,
     return
   }
   
-  const { text, name, school } = value;
+  const { text, name, school, featured } = value;
 
   try {
     const testimonialToSave = await Testimonial.create({
-      text, name, school, createdBy: user.id
+      text, name, school, featured, createdBy: user.id
     });
     res.json(testimonialToSave)
   } catch (e) {
@@ -90,7 +92,8 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async(r
   const testimonialSchema = Joi.object({
     text: Joi.string(),
     name: Joi.string(),
-    school: Joi.string()
+    school: Joi.string(),
+    featured: Joi.boolean()
   })
 
   const { error, value } = testimonialSchema.validate(testimonial)
