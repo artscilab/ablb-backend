@@ -93,7 +93,11 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async(r
     text: Joi.string(),
     name: Joi.string(),
     school: Joi.string(),
-    featured: Joi.boolean()
+    featured: Joi.boolean(),
+    id: Joi.optional(),
+    createdAt: Joi.optional(),
+    updatedAt: Joi.optional(),
+    createdBy: Joi.optional()
   })
 
   const { error, value } = testimonialSchema.validate(testimonial)
@@ -103,8 +107,14 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async(r
     return
   }
 
+  const {
+    text, name, school, featured
+  } = value;
+
   try {
-    await Testimonial.update(value, {
+    await Testimonial.update({
+      text, name, school, featured
+    }, {
       where: {
         id: tId
       }
