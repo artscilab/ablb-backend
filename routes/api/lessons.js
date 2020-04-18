@@ -125,9 +125,13 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (
   }
 
   const lessonSchema = Joi.object({
+    id: Joi.optional(),
     title: Joi.string(),
     description: Joi.string(),
-    instructionSheetLink: Joi.string().optional()
+    instructionSheetLink: Joi.string().optional(),
+    createdAt: Joi.optional(),
+    updatedAt: Joi.optional(),
+    createdBy: Joi.optional()
   });
 
   const { error, value } = lessonSchema.validate(lesson);

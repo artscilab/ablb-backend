@@ -184,11 +184,15 @@ router.patch("/:id", passport.authenticate('jwt', pOptions), adminRoute, async (
   }
 
   const videoSchema = Joi.object({
+    id: Joi.optional(),
     title: Joi.string(),
     description: Joi.string(),
     partNumber: Joi.number(),
-    videoLink: Joi.string(),
+    videoLink: Joi.string().allow(null),
     lessonId: Joi.number(),
+    createdAt: Joi.optional(),
+    updatedAt: Joi.optional(),
+    createdBy: Joi.optional()
   })
 
   const { error, value } = videoSchema.validate(video);
