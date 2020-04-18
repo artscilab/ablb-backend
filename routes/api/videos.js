@@ -44,7 +44,7 @@ router.get("/:id", async (req, res) => {
   } 
 })
 
-router.get("/:id/stream", passport.authenticate("jwt", pOptions), async (req, res) => {
+router.get("/:id/stream", passport.authenticate("jwt-query-param", pOptions), async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -146,7 +146,7 @@ router.patch("/:id/upload", passport.authenticate("jwt", pOptions), adminRoute, 
   }
 
   const videoFile = req.files.videoFile;
-  if (videoFile.mimetype !== "image/jpeg") {
+  if (videoFile.mimetype !== "video/mp4") {
     return res.status(400).json({
       error: "only mp4s are supported"
     })

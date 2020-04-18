@@ -28,11 +28,23 @@ passport.use(new LocalStrategy({
   }
 }));
 
-passport.use(new JWTStrategy({
+passport.use('jwt', new JWTStrategy({
     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
     secretOrKey: process.env.JWT_KEY,
   },
   (jwtPayload, done) => {
+    if (Date.now() > jwtPayload.expires) {
+      return done('jwt expired');
+    }
+
+    return done(null, jwtPayload);
+  }
+));
+
+passport.use("jwt-query-param", new JWTStrategy({
+    jwtFromRequest: ExtractJWT.fromUrlQueryParameter("token"),
+    secretOrKey: process.env.JWT_KEY
+  }, (jwtPayload, done) => {
     if (Date.now() > jwtPayload.expires) {
       return done('jwt expired');
     }
