@@ -8,7 +8,7 @@ const cors = require("cors");
 const querystring = require("querystring");
 const errorHandler = require("errorhandler");
 const fs = require('fs')
-
+const path = require("path")
 const isProduction = process.env.NODE_ENV === "production";
 
 if (!fs.existsSync(process.env.VIDEO_FILEPATH)) {
