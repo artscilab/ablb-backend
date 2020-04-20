@@ -18,7 +18,7 @@ if (!fs.existsSync(process.env.VIDEO_FILEPATH)) {
 
 const app = express();
 
-const allowedOrigins = ['http://localhost:3000', "https://ablb.now.sh"];
+const allowedOrigins = ['http://localhost:3000', "https://ablb.atec.io"];
 app.use(cors({
   origin: function(origin, callback) {
     if(!origin) return callback(null, true);
@@ -32,6 +32,8 @@ app.use(cors({
   credentials: true
 }));
 
+app.use(express.static(path.join(__dirname, 'client/build')));
+
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan("dev"));
@@ -44,6 +46,10 @@ require('./models');
 
 require('./config/passport');
 app.use(require('./routes'));
+
+app.get('*', (req,res) =>{
+  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
 
 const port = process.env.PORT || 8000;
 
