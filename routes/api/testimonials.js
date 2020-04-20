@@ -3,6 +3,7 @@ const bodyParser = require("body-parser")
 const router = require('express').Router();
 const Joi = require("@hapi/joi");
 const pOptions = {session: false}
+const querystring = require("querystring");
 const { adminRoute } = require("../../utils/middleware");
 
 const { Testimonial } = require("../../models");
@@ -11,8 +12,19 @@ router.use(bodyParser.json())
 
 // list all
 router.get("/", async (req, res, next) => {
+  const { featured } = req.query;
+  
   try {
-    const testimonials = await Testimonial.findAll();
+    let testimonials;
+    if (featured !== undefined) {
+      testimonials = await Testimonial.findAll({
+        where: {
+          featured: true
+        }
+      });
+    } else {
+      testimonials = await Testimonial.findAll();
+    }
     res.json(testimonials)
   } catch (e) {
     res.status(500).json({
