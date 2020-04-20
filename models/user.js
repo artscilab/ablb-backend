@@ -57,7 +57,8 @@ class User extends Model {
       id: this.id,
       email: this.email,
       school: this.school,
-      role: this.role
+      role: this.role,
+      name: this.name
     };
   }
 

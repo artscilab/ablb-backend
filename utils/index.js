@@ -3,9 +3,7 @@ const path = require("path");
 
 const authUserFromJWT = (req, res) => {
   return new Promise((resolve, reject) => {
-    passport.authenticate('jwt', (err, user, info) => {
-      console.log("here");
-      
+    passport.authenticate('jwt', (err, user, info) => {      
       if (err) reject(err);
       if (user) resolve(user);
     })(req, res)

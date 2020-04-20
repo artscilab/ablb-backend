@@ -8,6 +8,18 @@ const { User } = require("../../models");
 const { adminRoute } = require("../../utils/middleware");
 router.use(bodyParser.json())
 
+router.get("/", passport.authenticate("jwt", passportOptions), adminRoute, async (req, res) => {
+  try {
+    const users = await User.findAll();
+    const mapped = users.map((u) => {
+      return u.toSafeJSON();
+    })
+    res.json(mapped);
+  } catch(e) {
+    res.status(500).json(e)
+  }
+})
+
 router.post("/", async (req, res, next) => {
   const { body: { user } } = req;
   
@@ -38,9 +50,10 @@ router.post("/", async (req, res, next) => {
       const requestUser = await authUserFromJWT(req, res);
       const user = await User.findOne({
         where: {
-          id: requestUser.id
+          email: requestUser.email
         }
       });
+      console.log(user)
       if (!user || user.role !== "admin") {
         res.status(401).json({
           "error": "You must be an admin to create an admin user."
@@ -53,12 +66,12 @@ router.post("/", async (req, res, next) => {
         "error": "You must be logged in to create an admin user."
       });
     } 
-    return;
   }
 
   const { password, email, school, role, name } = value;
   const { salt, hash } = User.generateHashes(password);
   try {
+    console.log("here, ", salt, hash);
     const newUser = await User.create({
       email, school, role, name, salt, hash  
     })
