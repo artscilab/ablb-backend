@@ -126,6 +126,75 @@ router.post("/login", async (req, res, next) => {
   })(req, res, next);
 })
 
+router.patch("/:id", passport.authenticate("jwt", passportOptions), async (req, res) => {
+  const { id: userId } = req.user;
+  const { user } = req.body;
+  const { id: paramId } = req.params;
+  
+  // disallow changing other users' settings
+  let adminRequest = false;
+  let idToUpdate = userId;
+
+  // allow changing other users' settings if admin
+  if (paramId !== "" || paramId !== undefined) {
+    const user = await User.findByPk(userId);
+    if (user.role === "admin") {
+      idToUpdate = paramId;
+      adminRequest = true;
+    }
+  }
+
+  const schema = Joi.object({
+    password: Joi.string().min(8).optional().allow(""),
+    confirmPassword: Joi.ref('password'),
+    school: Joi.string().min(2).optional(),
+    name: Joi.string().min(2).required(),
+    role: Joi.string().optional().default("user"),
+  }).with('password', 'confirmPassword');
+  
+  const { error, value } = schema.validate(user, {
+    allowUnknown: true
+  });
+
+  if (error !== undefined) {
+    return res.status(400).json(error)
+  }
+
+  const { password, school, name } = value;
+  
+  const newValues = {
+    school, name
+  }
+
+  if (adminRequest) {
+    newValues["role"] = value.role
+  }
+
+  console.log(value);
+
+  if (password !== "") {
+    const { salt, hash } = User.generateHashes(password);
+    newValues.salt = salt;
+    newValues.hash = hash;
+  }
+
+  try {
+    await User.update(newValues, {
+      where: {
+        id: idToUpdate
+      }
+    })
+    return res.status(200).json({
+      message: "Successfully updated user."
+    })
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      error: "Could not update user."
+    })
+  }
+})
+
 router.get('/refresh', passport.authenticate('jwt', passportOptions), async (req, res, next) => {
   const {email} = req.user;
 
