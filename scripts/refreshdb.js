@@ -70,7 +70,7 @@ const run = async () => {
 
   const User = require("../models/user")
   const Lesson = require("../models/lesson")
-  const Video = require("../models/Video")
+  const Video = require("../models/video")
   const Testimonial = require("../models/testimonial")
 
   User.init(sequelize);
