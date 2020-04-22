@@ -6,6 +6,7 @@ const passportOptions = {session: false}
 const { authUserFromJWT } = require("../../utils")
 const { User } = require("../../models");
 const { adminRoute } = require("../../utils/middleware");
+
 router.use(bodyParser.json())
 
 router.get("/", passport.authenticate("jwt", passportOptions), adminRoute, async (req, res) => {
