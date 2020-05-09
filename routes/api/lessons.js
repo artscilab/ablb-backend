@@ -128,7 +128,7 @@ router.patch("/:id", passport.authenticate("jwt", pOptions), adminRoute, async (
     id: Joi.optional(),
     title: Joi.string(),
     description: Joi.string(),
-    instructionSheetLink: Joi.string().optional(),
+    instructionSheetLink: Joi.string().optional().allow(null),
     createdAt: Joi.optional(),
     updatedAt: Joi.optional(),
     createdBy: Joi.optional()
