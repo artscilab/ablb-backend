@@ -140,11 +140,12 @@ const uploadMiddleWare = fileUpload({
 
 router.patch("/:id/upload", passport.authenticate("jwt", pOptions), adminRoute, uploadMiddleWare, async (req, res) => {
   const id = req.params.id;
+  console.log("attempting to upload file")
 
   if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).send('No files were uploaded.');
   }
-
+  
   const videoFile = req.files.videoFile;
   if (videoFile.mimetype !== "video/mp4") {
     return res.status(400).json({
