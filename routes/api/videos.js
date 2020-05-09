@@ -138,7 +138,7 @@ const uploadMiddleWare = fileUpload({
   preserveExtension: true
 })
 
-router.put("/:id/upload", passport.authenticate("jwt", pOptions), adminRoute, uploadMiddleWare, async (req, res) => {
+router.post("/:id/upload", passport.authenticate("jwt", pOptions), adminRoute, uploadMiddleWare, async (req, res) => {
   const id = req.params.id;
   console.log("attempting to upload file")
 
