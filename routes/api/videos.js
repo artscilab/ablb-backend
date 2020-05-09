@@ -2,13 +2,11 @@ const passport = require('passport');
 const bodyParser = require("body-parser")
 const router = require('express').Router();
 const Joi = require("@hapi/joi");
-const fileUpload = require('express-fileupload');
 const { adminRoute } = require("../../utils/middleware");
-const { fileStoragePath } = require("../../utils")
 const pOptions = {session: false}
 const fs = require("fs")
-const path = require("path")
 const { Video } = require("../../models")
+const multer = require("multer");
 
 router.use(bodyParser.json());
 
@@ -130,48 +128,45 @@ router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req,
   }
 })
 
-const uploadMiddleWare = fileUpload({
-  useTempFiles: true,
-  tempFileDir: '/tmp/',
-  debug: process.env.NODE_ENV === "dev" ? true : false,
-  safeFileNames: true,
-  preserveExtension: true
+const upload = multer({
+  storage: multer.diskStorage({
+    filename: function (req, file, cb) {
+      cb(null, file.originalname + '-' + Date.now())
+    },
+    destination: function (req, file, cb) {
+      cb(null, `./${process.env.VIDEO_FILEPATH}`)
+    },
+  })
 })
 
-router.post("/:id/upload", passport.authenticate("jwt", pOptions), adminRoute, uploadMiddleWare, async (req, res) => {
+router.post("/:id/upload", passport.authenticate("jwt", pOptions), adminRoute, upload.single("videoFile"), async (req, res) => {
+    
   const id = req.params.id;
   console.log("attempting to upload file")
-
-  if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).send('No files were uploaded.');
-  }
   
-  const videoFile = req.files.videoFile;
+  const videoFile = req.file;
+  
   if (videoFile.mimetype !== "video/mp4") {
     return res.status(400).json({
       error: "only mp4s are supported"
     })
   }
-  const videoFileName = `${process.env.VIDEO_FILEPATH}/${videoFile.name}`
-  videoFile.mv(videoFileName, async (err) => {
-    if (err) {
-      return res.status(500).json({
-        error: "error uploading file"
-      })
-    }
-    
-    try {
-      await Video.update({videoLink: videoFileName}, {where: {id: id}})
-  
-      return res.status(200).json({
-        message: "file uploaded"
-      })
-    } catch (e) {
-      return res.status(500).json({
-        error: "error updating video"
-      })  
-    }
-  });
+
+  try {
+    await Video.update({
+      videoLink: `${process.env.VIDEO_FILEPATH}/${videoFile.filename}`
+    }, {
+      where: {id: id}
+    })
+
+    return res.status(200).json({
+      message: "file uploaded"
+    })
+  } catch (e) {
+    return res.status(500).json({
+      error: "error updating video"
+    })  
+  }
 })
 
 router.patch("/:id", passport.authenticate('jwt', pOptions), adminRoute, async (req, res) => {
