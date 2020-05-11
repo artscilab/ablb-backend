@@ -54,10 +54,17 @@ router.get("/:id/stream", passport.authenticate("jwt-query-param", pOptions), as
       })
     }
 
+    if (!fs.existsSync(filePath)) {
+      res.status(404).json({
+        error: "That file doesn't exist"
+      })
+      return
+    }
+    
     const stat = fs.statSync(filePath);
     const fileSize = stat.size;
     const range = req.headers.range;
-
+    
     if (range) {
       const parts = range.replace(/bytes=/, "").split("-")
       const start = parseInt(parts[0], 10)
