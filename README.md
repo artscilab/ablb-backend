@@ -1,6 +1,8 @@
 # ABLB - The Backend
 
-<img src="https://raw.githubusercontent.com/artscilab/ablb-app/master/public/ablb_color.png" width="256" height="256" title="ABLB Logo">
+<p align="center">
+  <img src="https://raw.githubusercontent.com/artscilab/ablb-app/master/public/ablb_color.png" width="256" height="256" title="ABLB Logo">
+</p>
 
 This is an [express.js](https://expressjs.com) server serving a RESTful API. 
 
@@ -21,3 +23,7 @@ This starts the server, with no watch-and-reload functionality.
 Depends on:
   - MySQL 
   - Client build deployed to `client/build` folder 
+
+## See also
+
+This is just the backend for ABLB. See the front-end here: [artscilab/ablb-app](https://github.com/artscilab/ablb-app)
