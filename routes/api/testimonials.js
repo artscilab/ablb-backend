@@ -28,7 +28,7 @@ router.get("/", async (req, res, next) => {
     res.json(testimonials)
   } catch (e) {
     res.status(500).json({
-      errors: "failed to get testimonials"
+      error: "failed to get testimonials"
     })
   }
 })
@@ -45,7 +45,7 @@ router.get("/:id", async (req, res, next) => {
     res.json(testimonial)
   } catch (e) {
     res.status(500).json({
-      errors: "failed to get that testimoial"
+      error: "failed to get that testimonial"
     })
   }
 })
@@ -53,8 +53,7 @@ router.get("/:id", async (req, res, next) => {
 // create one 
 router.post("/", passport.authenticate("jwt", pOptions), adminRoute, async (req, res, next) => {
   const { user, body: { testimonial } } = req;
-  console.log(testimonial);
-  
+
   if (testimonial === undefined) {
     res.status(400).json({
       error: "please provide testimonial data to create a new testimonial"

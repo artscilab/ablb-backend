@@ -19,11 +19,15 @@ const User = require("./user")
 const Testimonial = require("./testimonial");
 const Lesson = require("./lesson");
 const Video = require("./video");
+const Person = require("./person");
+const About = require("./about");
 
 User.init(sequelize).sync();
 Testimonial.init(sequelize).sync();
 Lesson.init(sequelize).sync();
 Video.init(sequelize).sync();
+Person.init(sequelize).sync();
+About.init(sequelize).sync();
 
 Lesson.hasMany(Video)
 
@@ -31,5 +35,7 @@ module.exports = {
   User: User,
   Testimonial: Testimonial,
   Video: Video,
-  Lesson: Lesson
+  Lesson: Lesson,
+  Person: Person,
+  About: About
 }

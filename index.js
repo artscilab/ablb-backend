@@ -11,12 +11,24 @@ const fs = require('fs')
 const path = require("path")
 const isProduction = process.env.NODE_ENV === "production";
 
-if (!fs.existsSync(process.env.VIDEO_FILEPATH)) {
-  console.log("video file path does not exist.");  
-  process.exit(0)
+const { VIDEO_FILEPATH, PICTURE_FILEPATH } = process.env;
+if (!fs.existsSync(VIDEO_FILEPATH)) {
+  fs.mkdirSync(VIDEO_FILEPATH);
+  console.log(`Created video filepath: ${VIDEO_FILEPATH}.`)
+}
+
+if (!fs.existsSync(PICTURE_FILEPATH)) {
+  fs.mkdirSync(PICTURE_FILEPATH);
+  console.log(`Created picture filepath: ${PICTURE_FILEPATH}.`)
 }
 
 const app = express();
+
+app.get(`/${PICTURE_FILEPATH}/:fileName`, (req, res) => {
+  let { fileName } = req.params;
+
+  res.sendFile(path.join(__dirname+`/${PICTURE_FILEPATH}/${fileName}`));
+})
 
 app.use(express.static(path.join(__dirname, 'client/build')));
 
