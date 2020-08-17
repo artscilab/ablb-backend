@@ -13,6 +13,7 @@ router.use(bodyParser.json());
 router.get("/", async (req, res) => {
   try {
     let people = await Person.findAll();
+    console.log(people)
     return res.json(people);
   } catch (e) {
     return res.status(500).json({
