@@ -45,7 +45,8 @@ require('./models');
 require('./config/passport');
 app.use(require('./routes'));
 
-app.get('*', (req,res) =>{
+app.get('*', (req,res) => {
+  console.log("Catchall - sending client")
   res.sendFile(path.join(__dirname+'/client/build/index.html'));
 });
 
